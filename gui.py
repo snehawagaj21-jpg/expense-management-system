@@ -988,80 +988,204 @@ def view_transactions():
 
     load_transactions()
 
-
 def create_dashboard():
 
+    # ================= MAIN WINDOW =================
+
     root = tk.Tk()
+    root.title("Personal Expense Tracker")
+    root.geometry("920x780")
+    root.resizable(False, False)
+    root.configure(bg="#000000")
 
-    root.title(
-        "Personal Expense Tracker"
+    # ================= CLASSIC COLORS =================
+
+    BG = "#000000"
+    HEADER = "#050505"
+
+    CARD = "#0B2342"
+    CARD_BORDER = "#174A7C"
+
+    BLUE = "#1769AA"
+    BLUE_LIGHT = "#2196F3"
+
+    WHITE = "#FFFFFF"
+    LIGHT_TEXT = "#B8CCE0"
+
+    GREEN = "#22C55E"
+    RED = "#EF4444"
+    BALANCE_BLUE = "#60A5FA"
+
+    PURPLE = "#5865F2"
+    ORANGE = "#D97706"
+
+    # ================= HEADER =================
+
+    header = tk.Frame(
+        root,
+        bg=HEADER,
+        height=105
     )
 
-    root.geometry(
-        "750x820"
-    )
-
-    root.resizable(
-        False,
-        False
+    header.pack(
+        fill="x"
     )
 
     title = tk.Label(
+        header,
+        text="PERSONAL EXPENSE TRACKER",
+        font=("Arial", 24, "bold"),
+        bg=HEADER,
+        fg=WHITE
+    )
+
+    title.pack(
+        pady=(18, 2)
+    )
+
+    subtitle = tk.Label(
+        header,
+        text="Manage your money smarter",
+        font=("Arial", 10),
+        bg=HEADER,
+        fg=LIGHT_TEXT
+    )
+
+    subtitle.pack()
+
+    # ================= SUMMARY =================
+
+    summary_frame = tk.Frame(
         root,
-        text="Personal Expense Tracker",
-        font=("Arial", 24, "bold")
+        bg=BG
     )
 
-    title.pack(pady=20)
+    summary_frame.pack(
+        pady=22
+    )
 
-    summary_frame = tk.Frame(root)
-    summary_frame.pack(pady=10)
+    # ---------- INCOME ----------
 
-    income_label = tk.Label(
+    income_card = tk.Frame(
         summary_frame,
-        text="Total Income: ₹0",
-        font=("Arial", 14, "bold")
+        bg=CARD,
+        width=260,
+        height=115,
+        highlightbackground=CARD_BORDER,
+        highlightthickness=1
     )
 
-    income_label.grid(
+    income_card.grid(
         row=0,
         column=0,
-        padx=30,
-        pady=10
+        padx=10
+    )
+
+    income_card.grid_propagate(False)
+
+    tk.Label(
+        income_card,
+        text="TOTAL INCOME",
+        font=("Arial", 10, "bold"),
+        bg=CARD,
+        fg=LIGHT_TEXT
+    ).pack(
+        pady=(17, 5)
+    )
+
+    income_label = tk.Label(
+        income_card,
+        text="₹0.00",
+        font=("Arial", 22, "bold"),
+        bg=CARD,
+        fg=GREEN
+    )
+
+    income_label.pack()
+
+    # ---------- EXPENSE ----------
+
+    expense_card = tk.Frame(
+        summary_frame,
+        bg=CARD,
+        width=260,
+        height=115,
+        highlightbackground=CARD_BORDER,
+        highlightthickness=1
+    )
+
+    expense_card.grid(
+        row=0,
+        column=1,
+        padx=10
+    )
+
+    expense_card.grid_propagate(False)
+
+    tk.Label(
+        expense_card,
+        text="TOTAL EXPENSE",
+        font=("Arial", 10, "bold"),
+        bg=CARD,
+        fg=LIGHT_TEXT
+    ).pack(
+        pady=(17, 5)
     )
 
     expense_label = tk.Label(
-        summary_frame,
-        text="Total Expense: ₹0",
-        font=("Arial", 14, "bold")
+        expense_card,
+        text="₹0.00",
+        font=("Arial", 22, "bold"),
+        bg=CARD,
+        fg=RED
     )
 
-    expense_label.grid(
+    expense_label.pack()
+
+    # ---------- BALANCE ----------
+
+    balance_card = tk.Frame(
+        summary_frame,
+        bg=CARD,
+        width=260,
+        height=115,
+        highlightbackground=CARD_BORDER,
+        highlightthickness=1
+    )
+
+    balance_card.grid(
         row=0,
-        column=1,
-        padx=30,
-        pady=10
+        column=2,
+        padx=10
+    )
+
+    balance_card.grid_propagate(False)
+
+    tk.Label(
+        balance_card,
+        text="CURRENT BALANCE",
+        font=("Arial", 10, "bold"),
+        bg=CARD,
+        fg=LIGHT_TEXT
+    ).pack(
+        pady=(17, 5)
     )
 
     balance_label = tk.Label(
-        summary_frame,
-        text="Balance: ₹0",
-        font=("Arial", 14, "bold")
+        balance_card,
+        text="₹0.00",
+        font=("Arial", 22, "bold"),
+        bg=CARD,
+        fg=BALANCE_BLUE
     )
 
-    balance_label.grid(
-        row=0,
-        column=2,
-        padx=30,
-        pady=10
-    )
+    balance_label.pack()
+
+    # ================= UPDATE DASHBOARD =================
 
     def update_dashboard():
 
-        conn = sqlite3.connect(
-            "expenses.db"
-        )
-
+        conn = sqlite3.connect("expenses.db")
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -1082,21 +1206,18 @@ def create_dashboard():
 
         conn.close()
 
-        balance = (
-            total_income -
-            total_expense
-        )
+        balance = total_income - total_expense
 
         income_label.config(
-            text=f"Total Income: ₹{total_income:.2f}"
+            text=f"₹{total_income:.2f}"
         )
 
         expense_label.config(
-            text=f"Total Expense: ₹{total_expense:.2f}"
+            text=f"₹{total_expense:.2f}"
         )
 
         balance_label.config(
-            text=f"Balance: ₹{balance:.2f}"
+            text=f"₹{balance:.2f}"
         )
 
         root.after(
@@ -1104,135 +1225,207 @@ def create_dashboard():
             update_dashboard
         )
 
-    button_frame = tk.Frame(root)
-    button_frame.pack(pady=20)
+    # ================= SECTION TITLE =================
 
-    tk.Button(
-        button_frame,
-        text="Add Income",
-        width=20,
-        height=2,
-        font=("Arial", 12),
-        command=lambda: add_transaction("Income")
+    def section_title(text):
+
+        label = tk.Label(
+            root,
+            text=text,
+            font=("Arial", 13, "bold"),
+            bg=BG,
+            fg=WHITE
+        )
+
+        label.pack(
+            anchor="w",
+            padx=38,
+            pady=(7, 5)
+        )
+
+    # ================= BUTTON =================
+
+    def create_button(
+        parent,
+        text,
+        command,
+        color=BLUE
+    ):
+
+        button = tk.Button(
+            parent,
+            text=text,
+            command=command,
+            font=("Arial", 10, "bold"),
+            bg=color,
+            fg=WHITE,
+            activebackground=BLUE_LIGHT,
+            activeforeground=WHITE,
+            width=22,
+            height=2,
+            bd=0,
+            relief="flat",
+            cursor="hand2"
+        )
+
+        return button
+
+    # ================= TRANSACTIONS =================
+
+    section_title("TRANSACTIONS")
+
+    transaction_frame = tk.Frame(
+        root,
+        bg=BG
+    )
+
+    transaction_frame.pack()
+
+    create_button(
+        transaction_frame,
+        "Add Income",
+        lambda: add_transaction("Income"),
+        GREEN
     ).grid(
         row=0,
         column=0,
-        padx=10,
-        pady=10
+        padx=7,
+        pady=5
     )
 
-    tk.Button(
-        button_frame,
-        text="Add Expense",
-        width=20,
-        height=2,
-        font=("Arial", 12),
-        command=lambda: add_transaction("Expense")
+    create_button(
+        transaction_frame,
+        "Add Expense",
+        lambda: add_transaction("Expense"),
+        RED
     ).grid(
         row=0,
         column=1,
-        padx=10,
-        pady=10
+        padx=7,
+        pady=5
     )
 
-    tk.Button(
-        button_frame,
-        text="View Transactions",
-        width=20,
-        height=2,
-        font=("Arial", 12),
-        command=view_transactions
+    create_button(
+        transaction_frame,
+        "View Transactions",
+        view_transactions,
+        BLUE
     ).grid(
-        row=1,
+        row=0,
+        column=2,
+        padx=7,
+        pady=5
+    )
+
+    # ================= ANALYTICS =================
+
+    section_title("ANALYTICS & REPORTS")
+
+    analytics_frame = tk.Frame(
+        root,
+        bg=BG
+    )
+
+    analytics_frame.pack()
+
+    create_button(
+        analytics_frame,
+        "Reports & Charts",
+        show_reports,
+        PURPLE
+    ).grid(
+        row=0,
         column=0,
-        padx=10,
-        pady=10
+        padx=7,
+        pady=5
     )
 
-    tk.Button(
-        button_frame,
-        text="Reports & Charts",
-        width=20,
-        height=2,
-        font=("Arial", 12),
-        command=show_reports
+    create_button(
+        analytics_frame,
+        "Monthly Summary",
+        show_summary,
+        BLUE
     ).grid(
-        row=1,
+        row=0,
         column=1,
-        padx=10,
-        pady=10
+        padx=7,
+        pady=5
     )
 
-    tk.Button(
-        button_frame,
-        text="Monthly Summary",
-        width=20,
-        height=2,
-        font=("Arial", 12),
-        command=show_summary
+    create_button(
+        analytics_frame,
+        "Monthly Comparison",
+        monthly_spending_comparison,
+        ORANGE
     ).grid(
-        row=2,
+        row=0,
+        column=2,
+        padx=7,
+        pady=5
+    )
+
+    # ================= SMART FINANCE =================
+
+    section_title("SMART FINANCE")
+
+    smart_frame = tk.Frame(
+        root,
+        bg=BG
+    )
+
+    smart_frame.pack()
+
+    create_button(
+        smart_frame,
+        "AI Spending Suggestions",
+        show_ai_suggestions,
+        PURPLE
+    ).grid(
+        row=0,
         column=0,
-        padx=10,
-        pady=10
+        padx=7,
+        pady=5
     )
 
-    tk.Button(
-        button_frame,
-        text="AI Spending Suggestions",
-        width=20,
-        height=2,
-        font=("Arial", 12),
-        command=show_ai_suggestions
+    create_button(
+        smart_frame,
+        "Budget & Spending Limit",
+        show_budget,
+        ORANGE
     ).grid(
-        row=2,
+        row=0,
         column=1,
-        padx=10,
-        pady=10
+        padx=7,
+        pady=5
     )
 
-    tk.Button(
-        button_frame,
-        text="Budget & Spending Limit",
-        width=20,
-        height=2,
-        font=("Arial", 12),
-        command=show_budget
+    create_button(
+        smart_frame,
+        "Financial Goals",
+        show_financial_goals,
+        BLUE
     ).grid(
-        row=3,
-        column=0,
-        padx=10,
-        pady=10
+        row=0,
+        column=2,
+        padx=7,
+        pady=5
     )
 
-    tk.Button(
-        button_frame,
-        text="📈 Monthly Spending Comparison",
-        width=20,
-        height=2,
-        font=("Arial", 12),
-        command=monthly_spending_comparison
-    ).grid(
-        row=3,
-        column=1,
-        padx=10,
-        pady=10
+    # ================= FOOTER =================
+
+    footer = tk.Label(
+        root,
+        text="TRACK  •  ANALYZE  •  SAVE  •  GROW",
+        font=("Arial", 9),
+        bg=BG,
+        fg="#6B8AA8"
     )
 
-    tk.Button(
-        button_frame,
-        text="🎯 Financial Goals",
-        width=20,
-        height=2,
-        font=("Arial", 12),
-        command=show_financial_goals
-    ).grid(
-        row=4,
-        column=0,
-        columnspan=2,
-        padx=10,
-        pady=10
+    footer.pack(
+        pady=18
     )
+
+    # ================= START =================
 
     update_dashboard()
 
