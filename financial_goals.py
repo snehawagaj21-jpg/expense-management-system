@@ -3,6 +3,30 @@ import sqlite3
 from tkinter import ttk, messagebox
 
 
+# ============================================================
+# THEME
+# ============================================================
+
+BG = "#07111F"
+CARD = "#0D1B2A"
+
+BLUE = "#1683FF"
+BLUE_LIGHT = "#42A5FF"
+BLUE_DARK = "#0B5DB7"
+
+WHITE = "#FFFFFF"
+LIGHT_TEXT = "#BFD7EA"
+
+ENTRY_BG = "#10283D"
+BORDER = "#1E4E73"
+
+SHADOW = "#020810"
+
+
+# ============================================================
+# CREATE TABLE
+# ============================================================
+
 def create_goals_table():
 
     conn = sqlite3.connect("expenses.db")
@@ -21,56 +45,392 @@ def create_goals_table():
     conn.close()
 
 
+# ============================================================
+# PREMIUM BUTTON
+# ============================================================
+
+def premium_button(parent, text, command, width=180):
+
+    height = 48
+    cut = 10
+
+    canvas = tk.Canvas(
+        parent,
+        width=width + 12,
+        height=height + 12,
+        bg=parent.cget("bg"),
+        highlightthickness=0,
+        bd=0
+    )
+
+    def cut_shape(x1, y1, x2, y2, c, fill, outline=""):
+
+        points = [
+            x1 + c, y1,
+            x2 - c, y1,
+            x2, y1 + c,
+            x2, y2 - c,
+            x2 - c, y2,
+            x1 + c, y2,
+            x1, y2 - c,
+            x1, y1 + c
+        ]
+
+        return canvas.create_polygon(
+            points,
+            fill=fill,
+            outline=outline
+        )
+
+    # Shadow
+    cut_shape(
+        5, 7,
+        width + 5,
+        height + 7,
+        cut,
+        SHADOW
+    )
+
+    # Depth
+    depth = cut_shape(
+        3, 4,
+        width + 3,
+        height + 4,
+        cut,
+        BLUE_DARK
+    )
+
+    # Main button
+    main = cut_shape(
+        1, 1,
+        width,
+        height,
+        cut,
+        BLUE,
+        "#56AEFF"
+    )
+
+    # Shine
+    shine = canvas.create_line(
+        cut + 7,
+        7,
+        width - cut - 7,
+        7,
+        fill="#7CC4FF",
+        width=2
+    )
+
+    # Left accent
+    accent = canvas.create_line(
+        9,
+        17,
+        9,
+        height - 17,
+        fill="#8DCEFF",
+        width=3
+    )
+
+    canvas.create_text(
+        width / 2,
+        height / 2 + 1,
+        text=text,
+        fill=WHITE,
+        font=("Segoe UI", 10, "bold")
+    )
+
+    def enter(event):
+
+        canvas.itemconfig(
+            main,
+            fill=BLUE_LIGHT
+        )
+
+        canvas.itemconfig(
+            depth,
+            fill=BLUE
+        )
+
+        canvas.itemconfig(
+            shine,
+            fill=WHITE
+        )
+
+        canvas.itemconfig(
+            accent,
+            fill=WHITE
+        )
+
+    def leave(event):
+
+        canvas.itemconfig(
+            main,
+            fill=BLUE
+        )
+
+        canvas.itemconfig(
+            depth,
+            fill=BLUE_DARK
+        )
+
+        canvas.itemconfig(
+            shine,
+            fill="#7CC4FF"
+        )
+
+        canvas.itemconfig(
+            accent,
+            fill="#8DCEFF"
+        )
+
+    canvas.bind(
+        "<Enter>",
+        enter
+    )
+
+    canvas.bind(
+        "<Leave>",
+        leave
+    )
+
+    canvas.bind(
+        "<Button-1>",
+        lambda event: command()
+    )
+
+    canvas.pack()
+
+    return canvas
+
+
+# ============================================================
+# 3D CARD
+# ============================================================
+
+def create_card(parent, width, height):
+
+    container = tk.Frame(
+        parent,
+        bg=parent.cget("bg")
+    )
+
+    container.pack(
+        pady=8
+    )
+
+    # Shadow
+    shadow = tk.Frame(
+        container,
+        bg=SHADOW
+    )
+
+    shadow.place(
+        x=7,
+        y=7,
+        width=width,
+        height=height
+    )
+
+    # Blue depth
+    depth = tk.Frame(
+        container,
+        bg="#0A2740"
+    )
+
+    depth.place(
+        x=4,
+        y=4,
+        width=width,
+        height=height
+    )
+
+    # Main card
+    card = tk.Frame(
+        container,
+        bg=CARD,
+        highlightbackground=BORDER,
+        highlightthickness=2
+    )
+
+    card.place(
+        x=0,
+        y=0,
+        width=width,
+        height=height
+    )
+
+    # Top blue highlight
+    tk.Frame(
+        card,
+        bg=BLUE,
+        height=3
+    ).place(
+        x=0,
+        y=0,
+        relwidth=1
+    )
+
+    container.config(
+        width=width + 8,
+        height=height + 8
+    )
+
+    return card
+
+
+# ============================================================
+# FINANCIAL GOALS
+# ============================================================
+
 def show_financial_goals():
 
     create_goals_table()
 
     window = tk.Toplevel()
-    window.title("Financial Goals")
-    window.geometry("750x600")
-    window.resizable(False, False)
+
+    window.title(
+        "Financial Goals"
+    )
+
+    window.geometry(
+        "800x760"
+    )
+
+    window.resizable(
+        False,
+        False
+    )
+
+    window.configure(
+        bg=BG
+    )
+
+    # ========================================================
+    # TITLE
+    # ========================================================
 
     tk.Label(
         window,
-        text="🎯 Financial Goals",
-        font=("Arial", 22, "bold")
-    ).pack(pady=20)
-
-    input_frame = tk.Frame(window)
-    input_frame.pack(pady=10)
+        text="FINANCIAL GOALS",
+        font=("Arial", 24, "bold"),
+        bg=BG,
+        fg=WHITE
+    ).pack(
+        pady=(25, 3)
+    )
 
     tk.Label(
-        input_frame,
-        text="Goal Name:"
-    ).grid(row=0, column=0, padx=5, pady=5)
+        window,
+        text="Set savings targets and track your progress",
+        font=("Arial", 10),
+        bg=BG,
+        fg=LIGHT_TEXT
+    ).pack(
+        pady=(0, 15)
+    )
+
+    # ========================================================
+    # INPUT CARD
+    # ========================================================
+
+    input_card = create_card(
+        window,
+        700,
+        185
+    )
+
+    # Goal name
+    tk.Label(
+        input_card,
+        text="GOAL NAME",
+        font=("Arial", 9, "bold"),
+        bg=CARD,
+        fg=LIGHT_TEXT
+    ).place(
+        x=30,
+        y=25
+    )
 
     goal_entry = tk.Entry(
-        input_frame,
-        width=25
+        input_card,
+        bg=ENTRY_BG,
+        fg=WHITE,
+        insertbackground=WHITE,
+        relief="flat",
+        font=("Arial", 10)
     )
-    goal_entry.grid(row=0, column=1, padx=5, pady=5)
 
+    goal_entry.place(
+        x=30,
+        y=52,
+        width=260,
+        height=32
+    )
+
+    # Target amount
     tk.Label(
-        input_frame,
-        text="Target Amount:"
-    ).grid(row=1, column=0, padx=5, pady=5)
+        input_card,
+        text="TARGET AMOUNT",
+        font=("Arial", 9, "bold"),
+        bg=CARD,
+        fg=LIGHT_TEXT
+    ).place(
+        x=325,
+        y=25
+    )
 
     target_entry = tk.Entry(
-        input_frame,
-        width=25
+        input_card,
+        bg=ENTRY_BG,
+        fg=WHITE,
+        insertbackground=WHITE,
+        relief="flat",
+        font=("Arial", 10)
     )
-    target_entry.grid(row=1, column=1, padx=5, pady=5)
 
+    target_entry.place(
+        x=325,
+        y=52,
+        width=150,
+        height=32
+    )
+
+    # Saved amount
     tk.Label(
-        input_frame,
-        text="Saved Amount:"
-    ).grid(row=2, column=0, padx=5, pady=5)
+        input_card,
+        text="SAVED AMOUNT",
+        font=("Arial", 9, "bold"),
+        bg=CARD,
+        fg=LIGHT_TEXT
+    ).place(
+        x=495,
+        y=25
+    )
 
     saved_entry = tk.Entry(
-        input_frame,
-        width=25
+        input_card,
+        bg=ENTRY_BG,
+        fg=WHITE,
+        insertbackground=WHITE,
+        relief="flat",
+        font=("Arial", 10)
     )
-    saved_entry.grid(row=2, column=1, padx=5, pady=5)
+
+    saved_entry.place(
+        x=495,
+        y=52,
+        width=150,
+        height=32
+    )
+
+    # ========================================================
+    # TABLE
+    # ========================================================
+
+    table_card = create_card(
+        window,
+        750,
+        345
+    )
 
     columns = (
         "ID",
@@ -82,37 +442,101 @@ def show_financial_goals():
     )
 
     tree = ttk.Treeview(
-        window,
+        table_card,
         columns=columns,
         show="headings",
         height=10
     )
 
     for column in columns:
-        tree.heading(column, text=column)
 
-    tree.column("ID", width=40)
-    tree.column("Goal", width=180)
-    tree.column("Target", width=100)
-    tree.column("Saved", width=100)
-    tree.column("Remaining", width=110)
-    tree.column("Progress", width=100)
+        tree.heading(
+            column,
+            text=column
+        )
 
-    tree.pack(
-        padx=20,
-        pady=15
+    tree.column(
+        "ID",
+        width=45,
+        anchor="center"
     )
+
+    tree.column(
+        "Goal",
+        width=190,
+        anchor="center"
+    )
+
+    tree.column(
+        "Target",
+        width=110,
+        anchor="center"
+    )
+
+    tree.column(
+        "Saved",
+        width=110,
+        anchor="center"
+    )
+
+    tree.column(
+        "Remaining",
+        width=120,
+        anchor="center"
+    )
+
+    tree.column(
+        "Progress",
+        width=110,
+        anchor="center"
+    )
+
+    tree.place(
+        x=15,
+        y=15,
+        width=710,
+        height=275
+    )
+
+    scrollbar = ttk.Scrollbar(
+        table_card,
+        orient="vertical",
+        command=tree.yview
+    )
+
+    scrollbar.place(
+        x=725,
+        y=15,
+        height=275
+    )
+
+    tree.configure(
+        yscrollcommand=scrollbar.set
+    )
+
+    # ========================================================
+    # LOAD GOALS
+    # ========================================================
 
     def load_goals():
 
         for item in tree.get_children():
-            tree.delete(item)
 
-        conn = sqlite3.connect("expenses.db")
+            tree.delete(
+                item
+            )
+
+        conn = sqlite3.connect(
+            "expenses.db"
+        )
+
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT id, goal_name, target_amount, saved_amount
+            SELECT id,
+                   goal_name,
+                   target_amount,
+                   saved_amount
             FROM financial_goals
             ORDER BY id DESC
         """)
@@ -128,11 +552,20 @@ def show_financial_goals():
             target = goal[2]
             saved = goal[3]
 
-            remaining = max(target - saved, 0)
+            remaining = max(
+                target - saved,
+                0
+            )
 
             if target > 0:
-                progress = min((saved / target) * 100, 100)
+
+                progress = min(
+                    (saved / target) * 100,
+                    100
+                )
+
             else:
+
                 progress = 0
 
             tree.insert(
@@ -148,46 +581,62 @@ def show_financial_goals():
                 )
             )
 
+    # ========================================================
+    # ADD GOAL
+    # ========================================================
+
     def add_goal():
 
         goal_name = goal_entry.get().strip()
+
         target = target_entry.get().strip()
+
         saved = saved_entry.get().strip()
 
         if not goal_name or not target:
+
             messagebox.showerror(
                 "Error",
                 "Goal Name and Target Amount are required."
             )
+
             return
 
         if not saved:
+
             saved = "0"
 
         try:
 
             target = float(target)
+
             saved = float(saved)
 
             if target <= 0:
+
                 messagebox.showerror(
                     "Error",
                     "Target amount must be greater than 0."
                 )
+
                 return
 
             if saved < 0:
+
                 messagebox.showerror(
                     "Error",
                     "Saved amount cannot be negative."
                 )
+
                 return
 
             if saved > target:
+
                 messagebox.showerror(
                     "Error",
                     "Saved amount cannot be greater than target amount."
                 )
+
                 return
 
         except ValueError:
@@ -196,9 +645,13 @@ def show_financial_goals():
                 "Error",
                 "Please enter valid amounts."
             )
+
             return
 
-        conn = sqlite3.connect("expenses.db")
+        conn = sqlite3.connect(
+            "expenses.db"
+        )
+
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -212,11 +665,23 @@ def show_financial_goals():
         ))
 
         conn.commit()
+
         conn.close()
 
-        goal_entry.delete(0, tk.END)
-        target_entry.delete(0, tk.END)
-        saved_entry.delete(0, tk.END)
+        goal_entry.delete(
+            0,
+            tk.END
+        )
+
+        target_entry.delete(
+            0,
+            tk.END
+        )
+
+        saved_entry.delete(
+            0,
+            tk.END
+        )
 
         messagebox.showinfo(
             "Success",
@@ -225,86 +690,173 @@ def show_financial_goals():
 
         load_goals()
 
+    # ========================================================
+    # UPDATE GOAL
+    # ========================================================
+
     def update_goal():
 
         selected = tree.selection()
 
         if not selected:
+
             messagebox.showwarning(
                 "Warning",
                 "Please select a goal."
             )
+
             return
 
-        item = tree.item(selected[0])
+        item = tree.item(
+            selected[0]
+        )
+
         goal_id = item["values"][0]
 
-        update_window = tk.Toplevel()
-        update_window.title("Update Financial Goal")
-        update_window.geometry("400x350")
-        update_window.resizable(False, False)
+        update_window = tk.Toplevel(
+            window
+        )
+
+        update_window.title(
+            "Update Financial Goal"
+        )
+
+        update_window.geometry(
+            "480x450"
+        )
+
+        update_window.resizable(
+            False,
+            False
+        )
+
+        update_window.configure(
+            bg=BG
+        )
 
         tk.Label(
             update_window,
-            text="Update Goal",
-            font=("Arial", 18, "bold")
-        ).pack(pady=20)
+            text="UPDATE FINANCIAL GOAL",
+            font=("Arial", 20, "bold"),
+            bg=BG,
+            fg=WHITE
+        ).pack(
+            pady=(25, 15)
+        )
 
-        tk.Label(
+        update_card = create_card(
             update_window,
-            text="Goal Name"
-        ).pack()
+            400,
+            270
+        )
+
+        # Goal name
+        tk.Label(
+            update_card,
+            text="GOAL NAME",
+            font=("Arial", 9, "bold"),
+            bg=CARD,
+            fg=LIGHT_TEXT
+        ).pack(
+            pady=(25, 3)
+        )
 
         name_entry = tk.Entry(
-            update_window,
-            width=30
+            update_card,
+            bg=ENTRY_BG,
+            fg=WHITE,
+            insertbackground=WHITE,
+            relief="flat",
+            font=("Arial", 10)
         )
-        name_entry.pack(pady=5)
+
+        name_entry.pack(
+            ipadx=70,
+            ipady=5
+        )
 
         name_entry.insert(
             0,
             item["values"][1]
         )
 
+        # Target
         tk.Label(
-            update_window,
-            text="Target Amount"
-        ).pack()
+            update_card,
+            text="TARGET AMOUNT",
+            font=("Arial", 9, "bold"),
+            bg=CARD,
+            fg=LIGHT_TEXT
+        ).pack(
+            pady=(10, 3)
+        )
 
         target_entry2 = tk.Entry(
-            update_window,
-            width=30
+            update_card,
+            bg=ENTRY_BG,
+            fg=WHITE,
+            insertbackground=WHITE,
+            relief="flat",
+            font=("Arial", 10)
         )
-        target_entry2.pack(pady=5)
+
+        target_entry2.pack(
+            ipadx=70,
+            ipady=5
+        )
 
         target_value = str(
             item["values"][2]
-        ).replace("₹", "")
+        ).replace(
+            "₹",
+            ""
+        )
 
         target_entry2.insert(
             0,
             target_value
         )
 
+        # Saved
         tk.Label(
-            update_window,
-            text="Saved Amount"
-        ).pack()
+            update_card,
+            text="SAVED AMOUNT",
+            font=("Arial", 9, "bold"),
+            bg=CARD,
+            fg=LIGHT_TEXT
+        ).pack(
+            pady=(10, 3)
+        )
 
         saved_entry2 = tk.Entry(
-            update_window,
-            width=30
+            update_card,
+            bg=ENTRY_BG,
+            fg=WHITE,
+            insertbackground=WHITE,
+            relief="flat",
+            font=("Arial", 10)
         )
-        saved_entry2.pack(pady=5)
+
+        saved_entry2.pack(
+            ipadx=70,
+            ipady=5
+        )
 
         saved_value = str(
             item["values"][3]
-        ).replace("₹", "")
+        ).replace(
+            "₹",
+            ""
+        )
 
         saved_entry2.insert(
             0,
             saved_value
         )
+
+        # ====================================================
+        # SAVE UPDATE
+        # ====================================================
 
         def save_update():
 
@@ -321,24 +873,30 @@ def show_financial_goals():
                 )
 
                 if not name:
+
                     messagebox.showerror(
                         "Error",
                         "Goal name is required."
                     )
+
                     return
 
                 if target <= 0:
+
                     messagebox.showerror(
                         "Error",
                         "Target amount must be greater than 0."
                     )
+
                     return
 
                 if saved < 0 or saved > target:
+
                     messagebox.showerror(
                         "Error",
                         "Saved amount must be between 0 and target amount."
                     )
+
                     return
 
             except ValueError:
@@ -347,9 +905,13 @@ def show_financial_goals():
                     "Error",
                     "Please enter valid amounts."
                 )
+
                 return
 
-            conn = sqlite3.connect("expenses.db")
+            conn = sqlite3.connect(
+                "expenses.db"
+            )
+
             cursor = conn.cursor()
 
             cursor.execute("""
@@ -366,6 +928,7 @@ def show_financial_goals():
             ))
 
             conn.commit()
+
             conn.close()
 
             update_window.destroy()
@@ -377,26 +940,34 @@ def show_financial_goals():
                 "Goal updated successfully!"
             )
 
-        tk.Button(
-            update_window,
-            text="Save Update",
-            width=15,
-            height=2,
-            command=save_update
-        ).pack(pady=20)
+        premium_button(
+            update_card,
+            "SAVE UPDATE",
+            save_update,
+            180
+        )
+
+    # ========================================================
+    # DELETE GOAL
+    # ========================================================
 
     def delete_goal():
 
         selected = tree.selection()
 
         if not selected:
+
             messagebox.showwarning(
                 "Warning",
                 "Please select a goal."
             )
+
             return
 
-        item = tree.item(selected[0])
+        item = tree.item(
+            selected[0]
+        )
+
         goal_id = item["values"][0]
 
         confirm = messagebox.askyesno(
@@ -405,9 +976,13 @@ def show_financial_goals():
         )
 
         if not confirm:
+
             return
 
-        conn = sqlite3.connect("expenses.db")
+        conn = sqlite3.connect(
+            "expenses.db"
+        )
+
         cursor = conn.cursor()
 
         cursor.execute(
@@ -416,6 +991,7 @@ def show_financial_goals():
         )
 
         conn.commit()
+
         conn.close()
 
         messagebox.showinfo(
@@ -425,40 +1001,48 @@ def show_financial_goals():
 
         load_goals()
 
-    button_frame = tk.Frame(window)
-    button_frame.pack(pady=10)
+    # ========================================================
+    # BUTTONS
+    # ========================================================
 
-    tk.Button(
-        button_frame,
-        text="Add Goal",
-        width=15,
-        command=add_goal
-    ).grid(
-        row=0,
-        column=0,
-        padx=5
+    button_card = create_card(
+        window,
+        700,
+        85
     )
 
-    tk.Button(
-        button_frame,
-        text="Update Goal",
-        width=15,
-        command=update_goal
-    ).grid(
-        row=0,
-        column=1,
-        padx=5
+    premium_button(
+        button_card,
+        "ADD GOAL",
+        add_goal,
+        170
+    ).place(
+        x=35,
+        y=15
     )
 
-    tk.Button(
-        button_frame,
-        text="Delete Goal",
-        width=15,
-        command=delete_goal
-    ).grid(
-        row=0,
-        column=2,
-        padx=5
+    premium_button(
+        button_card,
+        "UPDATE GOAL",
+        update_goal,
+        170
+    ).place(
+        x=265,
+        y=15
     )
+
+    premium_button(
+        button_card,
+        "DELETE GOAL",
+        delete_goal,
+        170
+    ).place(
+        x=495,
+        y=15
+    )
+
+    # ========================================================
+    # LOAD DATA
+    # ========================================================
 
     load_goals()
